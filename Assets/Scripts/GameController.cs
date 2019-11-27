@@ -10,7 +10,6 @@ public class GameController : MonoBehaviour
         int mode = PlayerPrefs.GetInt("Mode");
         print(mode);
 
-        int counter = 0;
         int [,]matrix = new int[mode,mode];
 
         List<int> done = new List<int>();
