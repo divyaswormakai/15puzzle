@@ -9,11 +9,15 @@ public class fiveBox : MonoBehaviour
     public TextMeshProUGUI box;
     public Button up, down,left, right;
     int[,] matrix;
-    int activeX, activeY;
+    public int activeX, activeY;
+    public bool[] possibleSteps;
+    int mode;
     //X is the row  and Y is the column
     void Start()
     {
-        int mode = PlayerPrefs.GetInt("Mode");
+        possibleSteps = new bool[4];
+        mode = PlayerPrefs.GetInt("Mode");
+        mode = 3;
         matrix = new int[mode, mode];
 
         List<int> done = new List<int>();
@@ -43,16 +47,39 @@ public class fiveBox : MonoBehaviour
                 }
             }
         }
-
         SetString();
+
+        //For the A* algorithm
+        FindObjectOfType<Astar>().SetGoals(mode);
+    }
+
+    public int[,] GetMatrix()
+    {
+        return matrix;
+    }
+
+    public int GetActiveX()
+    {
+        return activeX;
+    }
+
+    public int GetActiveY()
+    {
+        return activeY;
+    }
+
+    public bool[] GetPossibleStepsArray()
+    {
+        GetPossibleSteps();
+        return possibleSteps;
     }
 
     void SetString()
     {
         string temp = "";
-        for (int i = 0; i < matrix.GetLength(0); i++)
+        for (int i = 0; i < mode; i++)
         {
-            for (int j = 0; j < matrix.GetLength(1); j++)
+            for (int j = 0; j < mode; j++)
             {
                 temp += matrix[i, j].ToString() + "\t";
             }
@@ -69,36 +96,45 @@ public class fiveBox : MonoBehaviour
         {
             print("Correct");
         }
+
         left.gameObject.SetActive(true);
         right.gameObject.SetActive(true);
         up.gameObject.SetActive(true);
         down.gameObject.SetActive(true);
+        for(int i = 0; i < 4; i++)
+        {
+            possibleSteps[i] = true;
+        }
         //activeX for the vertical and  activeY for the horizontal
         if (activeX - 1 < 0)
         {
             up.gameObject.SetActive(false);
+            possibleSteps[0] = false;
+            
         }
-        if (activeX + 1 > matrix.GetLength(0))
+        if (activeX + 1 >= mode)
         {
             down.gameObject.SetActive(false);
+            possibleSteps[1] = false;
         }
         if (activeY - 1 < 0)
         {
             left.gameObject.SetActive(false);
+            possibleSteps[2] = false;
         }
-        if (activeY + 1 > matrix.GetLength(0))
+        if (activeY + 1 >= mode)
         {
             right.gameObject.SetActive(false);
+            possibleSteps[3] = false;
         }
-        print(activeX + "," + activeY + "=" + matrix[activeX,activeY]);
     }
 
     bool CheckCorrect()
     {
         int counter = 1;
-        for(int i = 0; i < matrix.GetLength(0); i++)
+        for(int i = 0; i < mode; i++)
         {
-            for(int j = 0; j < matrix.GetLength(1); j++)
+            for(int j = 0; j < mode; j++)
             {
                 if(matrix[i,j] == counter)
                 {
@@ -121,7 +157,7 @@ public class fiveBox : MonoBehaviour
 
         SetString();
     }
-    public void ModeDown()
+    public void MoveDown()
     {
         int temp = matrix[activeX, activeY];
         matrix[activeX, activeY] = matrix[++activeX, activeY];
