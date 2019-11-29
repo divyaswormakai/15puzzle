@@ -20,10 +20,42 @@ public class fiveBox : MonoBehaviour
         mode = 3;
         matrix = new int[mode, mode];
 
-        List<int> done = new List<int>();
-        for (int i = 0; i < matrix.GetLength(0); i++)
+        GeneratePuzzle();
+        while (true)
         {
-            for (int j = 0; j < matrix.GetLength(1); j++)
+            int invCount = GetInvCount();
+            print("In loop");
+            if (invCount % 2 == 0)
+            {
+                break;
+            }
+            GeneratePuzzle();
+        }
+  
+/*
+        matrix[0, 0] = 1;
+        matrix[0, 1] = 2;
+        matrix[0, 2] = 3;
+        matrix[1, 0] = 0;
+        matrix[1, 1] = 4;
+        matrix[1, 2] = 6;
+        matrix[2, 0] = 7;
+        matrix[2, 1] = 5;
+        matrix[2, 2] = 8;
+        activeX = 1;
+        activeY = 0;*/
+        SetString();
+
+        //For the A* algorithm
+        FindObjectOfType<Astar>().SetGoals(mode);
+    }
+
+    void GeneratePuzzle()
+    {
+        List<int> done = new List<int>();
+        for (int i = 0; i < mode; i++)
+        {
+            for (int j = 0; j < mode; j++)
             {
                 bool complete = true;
                 while (complete)
@@ -40,17 +72,25 @@ public class fiveBox : MonoBehaviour
                         complete = false;
                     }
                 }
-                if(matrix[i,j] == 0)
+                if (matrix[i, j] == 0)
                 {
                     activeX = i;
                     activeY = j;
                 }
             }
         }
-        SetString();
+    }
 
-        //For the A* algorithm
-        FindObjectOfType<Astar>().SetGoals(mode);
+    int GetInvCount()
+    {
+        int inv_count = 0;
+        for (int i = 0; i < mode - 1; i++)
+            for (int j = i + 1; j < mode; j++)
+
+                // Value 0 is used for empty space 
+                if (matrix[j, i] > 0 && matrix[j, i] > 0 && matrix[j, i] > matrix[i, j])
+                    inv_count++;
+        return inv_count;
     }
 
     public int[,] GetMatrix()
@@ -88,6 +128,17 @@ public class fiveBox : MonoBehaviour
         box.SetText(temp);
 
         GetPossibleSteps();
+
+        int invCount = GetInvCount();
+        if (invCount % 2 != 0)
+        {
+            print("----------Unsolvable now-----------");
+        }
+        else
+        {
+            print("------Can be solved----------");
+        }
+
     }
 
     void GetPossibleSteps()

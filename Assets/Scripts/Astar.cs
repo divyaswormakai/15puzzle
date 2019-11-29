@@ -9,10 +9,14 @@ public class Astar : MonoBehaviour
     fiveBox fiveBoxScript;
     int mode;
 
+    int previousStep;
+    
+    //Track only the immediate parent somehow
     private void Start()
     {
         fiveBoxScript = FindObjectOfType<fiveBox>();
     }
+
     public void SetGoals(int size)
     {
         mode = size;
@@ -22,12 +26,13 @@ public class Astar : MonoBehaviour
         {
             for (int j = 0; j < size; j++)
             {
-                if(i==size && j == size)
+                if(i==size-1 && j == size-1)
                 {
                     goalState[i, j] = 0;
                     continue;
                 }
                 goalState[i, j] = counter;
+                counter += 1;
             }
         }
     }
@@ -38,17 +43,10 @@ public class Astar : MonoBehaviour
         int mainActiveX = fiveBoxScript.GetActiveX();
         int mainActiveY = fiveBoxScript.GetActiveY();
         bool[] possibleSteps = fiveBoxScript.GetPossibleStepsArray();
-        string temp = "";
-        for(int i = 0; i < possibleSteps.Length; i++)
-        {
-            temp += possibleSteps[i].ToString()+", ";
-        }
-        print(temp);
 
         //UDLR operation
         int minVal = 50;            //random value
-        int changeValue = 6;        //random value
-
+        int changeValue = 4;
         for(int i = 0; i < 4; i++)
         {
             if (possibleSteps[i])
@@ -65,7 +63,7 @@ public class Astar : MonoBehaviour
                 int activeX = mainActiveX;
                 int activeY = mainActiveY;
                 int val = tempMatrix[activeX, activeY];
-                print(activeX + "," + activeY+ "="+val);
+                //print(activeX + "," + activeY+ "="+val);
 
                 if (i == 0)         //Up
                 {
@@ -91,8 +89,8 @@ public class Astar : MonoBehaviour
                     tempMatrix[activeX, activeY + 1] = val;
                     print("right");
                 }
-
                 int manhattan = CalculateManhattan(tempMatrix);
+                print("Manhattan = " + manhattan);
                 if (manhattan <= minVal)
                 {
                     minVal = manhattan;
@@ -100,33 +98,23 @@ public class Astar : MonoBehaviour
                 }
             }
         }
-        switch (changeValue)
+        
+        
+        if (changeValue == 0)
         {
-            case 0:     //UP
-                {
-                    fiveBoxScript.MoveUp();
-                    break;
-                }
-            case 1:
-                {
-                    fiveBoxScript.MoveDown();
-                    break;
-                }
-            case 2:
-                {
-                    fiveBoxScript.MoveLeft();
-                    break;
-                }
-            case 3:
-                {
-                    fiveBoxScript.MoveRight();
-                    break;
-                }
-            default:
-                {
-                    break;
-                }
-
+            fiveBoxScript.MoveUp();
+        }
+        else if (changeValue == 1)
+        {
+            fiveBoxScript.MoveDown();
+        }
+        else if (changeValue == 2)
+        {
+            fiveBoxScript.MoveLeft();
+        }
+        else if (changeValue == 3)
+        {
+            fiveBoxScript.MoveRight();
         }
     }
 
@@ -142,7 +130,8 @@ public class Astar : MonoBehaviour
                 if (currVal != 0)
                 {
                     int[] goalValues = FindGoalPosition(currVal);
-                    totalManhattan += System.Math.Abs(goalValues[0] - i) + System.Math.Abs(goalValues[1] - j);
+                    int tempManhattan = System.Math.Abs(goalValues[0] - i) + System.Math.Abs(goalValues[1] - j);
+                    totalManhattan += tempManhattan;
                 }             
             }
         }
@@ -165,4 +154,5 @@ public class Astar : MonoBehaviour
         }
         return pos;
     }
+   
 }
